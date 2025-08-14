@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}About - PaddySense{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="jumbotron bg-light">
+            <h1 class="display-4 text-success">About PaddySense</h1>
+            <p class="lead">Revolutionizing paddy farming with AI-powered insights and smart agriculture solutions.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Our Mission</h5>
+                <p class="card-text">
+                    PaddySense is dedicated to transforming traditional farming practices into data-driven, 
+                    intelligent agriculture. We leverage cutting-edge AI technology to provide farmers with 
+                    actionable insights for better crop management and increased yields.
+                </p>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5 class="card-title">Key Features</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2">🌱 <strong>Crop Monitoring:</strong> Real-time tracking of crop health and growth</li>
+                    <li class="mb-2">🌤️ <strong>Weather Intelligence:</strong> Accurate forecasts and recommendations</li>
+                    <li class="mb-2">📊 <strong>Data Analytics:</strong> Comprehensive insights and reporting</li>
+                    <li class="mb-2">🤖 <strong>AI Recommendations:</strong> Smart suggestions for optimal farming</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Why Choose PaddySense?</h5>
+                <p class="card-text">
+                    Our platform combines traditional farming wisdom with modern technology to create 
+                    a comprehensive solution for today's farmers.
+                </p>
+                <a href="{% url 'main:contact' %}" class="btn btn-success">Get Started</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

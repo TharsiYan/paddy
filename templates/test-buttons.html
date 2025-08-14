@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Button Test - PaddySense{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="jumbotron bg-light">
+            <h1 class="display-4 text-success">🧪 Button Functionality Test</h1>
+            <p class="lead">Test the click event handlers for all action buttons.</p>
+            <p>Open your browser's Developer Console (F12) to see the console.log messages when you click the buttons.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Main Action Buttons -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-play"></i> Main Action Buttons
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <button type="button" class="btn btn-success btn-lg mr-3" data-action="schedule-irrigation">
+                    <i class="fas fa-tint"></i> Schedule Irrigation
+                </button>
+                <button type="button" class="btn btn-warning btn-lg mr-3" data-action="apply-fertilizer">
+                    <i class="fas fa-seedling"></i> Apply Fertilizer
+                </button>
+                <button type="button" class="btn btn-info btn-lg" data-action="request-expert">
+                    <i class="fas fa-user-tie"></i> Request Expert
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dashboard Action Buttons -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-cogs"></i> Dashboard Action Buttons
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <button type="button" class="btn btn-outline-success btn-md mr-2" data-action="dashboard-action" data-action-type="water-crop">
+                    <i class="fas fa-tint"></i> Water Crop
+                </button>
+                <button type="button" class="btn btn-outline-warning btn-md mr-2" data-action="dashboard-action" data-action-type="check-soil">
+                    <i class="fas fa-thermometer-half"></i> Check Soil
+                </button>
+                <button type="button" class="btn btn-outline-info btn-md" data-action="dashboard-action" data-action-type="view-report">
+                    <i class="fas fa-chart-bar"></i> View Report
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recommendation Action Buttons -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-tasks"></i> Recommendation Action Buttons
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <button type="button" class="btn btn-outline-success btn-md mr-2" data-action="mark-complete">
+                    <i class="fas fa-check"></i> Mark Complete
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-md" data-action="snooze">
+                    <i class="fas fa-clock"></i> Snooze
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Display -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle"></i> Status Display
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="irrigation-status text-muted">
+                            <i class="fas fa-clock"></i> Ready to Schedule
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="fertilizer-status text-muted">
+                            <i class="fas fa-clock"></i> Ready to Apply
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="expert-status text-muted">
+                            <i class="fas fa-clock"></i> Expert Available
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Instructions -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6 class="text-muted">
+                    <i class="fas fa-info-circle"></i> How to Test:
+                </h6>
+                <ol class="mb-0">
+                    <li>Open your browser's Developer Console (Press F12)</li>
+                    <li>Click any of the buttons above</li>
+                    <li>Watch for console.log messages</li>
+                    <li>Look for alert notifications</li>
+                    <li>Observe status changes</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Navigation -->
+<div class="row mt-4">
+    <div class="col-md-12 text-center">
+        <a href="{% url 'main:dashboard' %}" class="btn btn-success btn-lg me-3">
+            <i class="fas fa-chart-line"></i> Back to Dashboard
+        </a>
+        <a href="{% url 'main:home' %}" class="btn btn-outline-secondary btn-lg">
+            <i class="fas fa-home"></i> Back to Home
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - PaddySense{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="jumbotron bg-light">
+            <h1 class="display-4 text-success">Welcome to PaddySense</h1>
+            <p class="lead">Your intelligent solution for paddy farming and crop management.</p>
+            <hr class="my-4">
+            <p>Get started with smart farming techniques and data-driven insights.</p>
+            <a class="btn btn-success btn-lg" href="{% url 'main:about' %}" role="button">Learn More</a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">🌱 Crop Monitoring</h5>
+                        <p class="card-text">Monitor your paddy crops with real-time data and analytics.</p>
+                        <a href="{% url 'main:dashboard' %}" class="btn btn-outline-success">View Details</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">🌤️ Weather Insights</h5>
+                        <p class="card-text">Get accurate weather forecasts and recommendations for your farm.</p>
+                        <a href="{% url 'main:weather' %}" class="btn btn-outline-success">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">📊 Data Analytics</h5>
+                        <p class="card-text">Comprehensive insights and reporting for better decision making.</p>
+                        <a href="{% url 'main:analytics' %}" class="btn btn-outline-success">View Details</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">🤖 AI Recommendations</h5>
+                        <p class="card-text">Smart suggestions for optimal farming practices.</p>
+                        <a href="{% url 'main:recommendations' %}" class="btn btn-outline-success">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">🌤️ Current Weather</h5>
+                <div id="weather-display">
+                    <div class="text-center">
+                        <p class="mb-1"><strong>--°C</strong></p>
+                        <p class="mb-1">Loading...</p>
+                        <p class="mb-0">Humidity: --%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5 class="card-title">📈 Quick Stats</h5>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h6 class="text-success">85%</h6>
+                        <small>Crop Health</small>
+                    </div>
+                    <div class="col-6">
+                        <h6 class="text-info">72°F</h6>
+                        <small>Soil Temp</small>
+                    </div>
+                </div>
+                <div class="row text-center mt-2">
+                    <div class="col-6">
+                        <h6 class="text-warning">60%</h6>
+                        <small>Moisture</small>
+                    </div>
+                    <div class="col-6">
+                        <h6 class="text-primary">14</h6>
+                        <small>Days Left</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Social Media Section -->
+<div class="row mt-5">
+    <div class="col-md-12">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <h5 class="card-title text-success mb-3">
+                    <i class="fas fa-share-alt"></i> Follow Us on Social Media
+                </h5>
+                <p class="text-muted mb-4">Stay updated with the latest farming insights and tips</p>
+                
+                <div class="social-media-buttons">
+                    <a href="https://www.facebook.com/PaddySense" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg mx-2 mb-2">
+                        <i class="fab fa-facebook-f fa-lg"></i> Facebook
+                    </a>
+                    <a href="https://twitter.com/PaddySense" target="_blank" rel="noopener noreferrer" class="btn btn-info btn-lg mx-2 mb-2">
+                        <i class="fab fa-twitter fa-lg"></i> Twitter
+                    </a>
+                    <a href="https://www.linkedin.com/company/paddysense" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-lg mx-2 mb-2">
+                        <i class="fab fa-linkedin-in fa-lg"></i> LinkedIn
+                    </a>
+                </div>
+                
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-external-link-alt"></i> Links open in new tab for your convenience
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

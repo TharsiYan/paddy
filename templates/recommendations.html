@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Recommendations - PaddySense{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="text-success">🤖 AI Recommendations</h1>
+            <a href="{% url 'main:home' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card border-left-danger border-left-4">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle fa-2x text-danger"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h4 class="text-danger mb-0">{{ summary.high_priority }}</h4>
+                        <small class="text-muted">High Priority</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card border-left-warning border-left-4">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-circle fa-2x text-warning"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h4 class="text-warning mb-0">{{ summary.medium_priority }}</h4>
+                        <small class="text-muted">Medium Priority</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card border-left-info border-left-4">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle fa-2x text-info"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h4 class="text-info mb-0">{{ summary.low_priority }}</h4>
+                        <small class="text-muted">Low Priority</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card border-left-success border-left-4">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-chart-line fa-2x text-success"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h4 class="text-success mb-0">{{ summary.total_recommendations }}</h4>
+                        <small class="text-muted">Total</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Impact Summary -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <h5 class="text-success mb-2">
+                    <i class="fas fa-lightbulb"></i> Estimated Impact
+                </h5>
+                <p class="lead mb-0">{{ summary.estimated_impact }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-filter"></i> Filter Recommendations
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label"><strong>Severity Level:</strong></label>
+                        <select class="form-control form-control-sm" id="severity-filter">
+                            <option value="">All Severities</option>
+                            {% for severity in filters.severity_levels %}
+                            <option value="{{ severity }}">{{ severity }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label"><strong>Category:</strong></label>
+                        <select class="form-control form-control-sm" id="category-filter">
+                            <option value="">All Categories</option>
+                            {% for category in filters.categories %}
+                            <option value="{{ category }}">{{ category }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label"><strong>Crop Stage:</strong></label>
+                        <select class="form-control form-control-sm" id="stage-filter">
+                            <option value="">All Stages</option>
+                            {% for stage in filters.crop_stages %}
+                            <option value="{{ stage }}">{{ stage }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recommendations List -->
+<div class="row">
+    <div class="col-md-12">
+        {% for recommendation in recommendations %}
+        <div class="card mb-3 recommendation-card" 
+             data-severity="{{ recommendation.severity }}" 
+             data-category="{{ recommendation.category }}" 
+             data-stage="{{ recommendation.crop_stage }}">
+            <div class="card-header bg-{{ recommendation.color }} text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0">
+                        <i class="{{ recommendation.icon }}"></i> 
+                        {{ recommendation.title }}
+                    </h6>
+                    <div>
+                        <span class="badge badge-light text-{{ recommendation.color }} me-2">
+                            Priority {{ recommendation.priority }}
+                        </span>
+                        <span class="badge badge-light text-{{ recommendation.color }}">
+                            {{ recommendation.severity }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h6 class="text-muted mb-2">
+                            <i class="fas fa-tag"></i> {{ recommendation.category }} | 
+                            <i class="fas fa-seedling"></i> {{ recommendation.crop_stage }}
+                        </h6>
+                        <p class="mb-2"><strong>Reason:</strong> {{ recommendation.reason }}</p>
+                        <p class="mb-3">{{ recommendation.description }}</p>
+                        
+                        <div class="mb-3">
+                            <strong>Suggested Actions:</strong>
+                            <ul class="mb-0 mt-2">
+                                {% for action in recommendation.suggested_actions %}
+                                <li>{{ action }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <strong>Deadline:</strong><br>
+                                    <span class="text-{{ recommendation.color }}">{{ recommendation.deadline }}</span>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Impact:</strong><br>
+                                    <small>{{ recommendation.estimated_impact }}</small>
+                                </div>
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-sm btn-outline-{{ recommendation.color }} me-2" data-action="mark-complete">
+                                        <i class="fas fa-check"></i> Mark Complete
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-action="snooze">
+                                        <i class="fas fa-clock"></i> Snooze
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="row mt-4">
+    <div class="col-md-12 text-center">
+        <a href="{% url 'main:dashboard' %}" class="btn btn-success btn-lg me-3">
+            <i class="fas fa-chart-line"></i> View Dashboard
+        </a>
+        <a href="{% url 'main:analytics' %}" class="btn btn-outline-success btn-lg me-3">
+            <i class="fas fa-chart-bar"></i> View Analytics
+        </a>
+        <a href="{% url 'main:weather' %}" class="btn btn-outline-info btn-lg">
+            <i class="fas fa-cloud-sun"></i> Weather Insights
+        </a>
+    </div>
+</div>
+
+<!-- JavaScript for filtering -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const severityFilter = document.getElementById('severity-filter');
+    const categoryFilter = document.getElementById('category-filter');
+    const stageFilter = document.getElementById('stage-filter');
+    const recommendationCards = document.querySelectorAll('.recommendation-card');
+    
+    function filterRecommendations() {
+        const selectedSeverity = severityFilter.value;
+        const selectedCategory = categoryFilter.value;
+        const selectedStage = stageFilter.value;
+        
+        recommendationCards.forEach(card => {
+            const severity = card.dataset.severity;
+            const category = card.dataset.category;
+            const stage = card.dataset.stage;
+            
+            const severityMatch = !selectedSeverity || severity === selectedSeverity;
+            const categoryMatch = !selectedCategory || category === selectedCategory;
+            const stageMatch = !selectedStage || stage === selectedStage;
+            
+            if (severityMatch && categoryMatch && stageMatch) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    severityFilter.addEventListener('change', filterRecommendations);
+    categoryFilter.addEventListener('change', filterRecommendations);
+    stageFilter.addEventListener('change', filterRecommendations);
+});
+</script>
+{% endblock %}

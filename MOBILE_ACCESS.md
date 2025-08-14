@@ -32,6 +32,7 @@ http://YOUR_COMPUTER_NAME:8000
 6. **About**: `http://192.168.80.211:8000/about/`
 7. **Contact**: `http://192.168.80.211:8000/contact/`
 8. **Test Buttons**: `http://192.168.80.211:8000/test-buttons/`
+9. **Mobile Test**: `http://192.168.80.211:8000/mobile-test/`
 
 ### **📱 How to Access on Your Phone:**
 
@@ -89,17 +90,25 @@ python manage.py runserver 0.0.0.0:8000
 #### **Firewall Issues (if access is blocked):**
 If you can't access the app from your phone, Windows Firewall might be blocking port 8000.
 
-**Option 1: Temporary Firewall Rule (Run as Administrator)**
+**Option 1: Run the Firewall Fix Script (Recommended)**
+1. Right-click on `fix_firewall.bat` and select "Run as Administrator"
+2. This will automatically create the necessary firewall rules
+
+**Option 2: Manual Firewall Rule (Run as Administrator)**
 ```powershell
 netsh advfirewall firewall add rule name="Django Development Server" dir=in action=allow protocol=TCP localport=8000
 ```
 
-**Option 2: Manual Firewall Configuration**
+**Option 3: Manual Firewall Configuration**
 1. Open Windows Defender Firewall
 2. Click "Allow an app or feature through Windows Defender Firewall"
 3. Click "Change settings"
 4. Find Python or add a new rule for port 8000
 5. Allow both Private and Public networks
+
+**Option 4: Use the Mobile Test Page**
+Try accessing the mobile test page first: `http://192.168.80.211:8000/mobile-test/`
+This page is designed to help diagnose mobile access issues.
 
 ### **🎯 Pro Tips:**
 - **Bookmark the URL** on your phone for quick access

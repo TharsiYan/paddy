@@ -12,6 +12,7 @@ urlpatterns = [
     path('analytics/', views.analytics, name='analytics'),
     path('recommendations/', views.recommendations, name='recommendations'),
     path('test-buttons/', views.test_buttons, name='test_buttons'),
+    path('mobile-test/', views.mobile_test, name='mobile_test'),
 ]
 
 

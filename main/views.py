@@ -309,3 +309,7 @@ def recommendations(request):
 def test_buttons(request):
     """Test page for button functionality"""
     return render(request, 'test-buttons.html')
+
+def mobile_test(request):
+    """Mobile access test page"""
+    return render(request, 'mobile_test.html')

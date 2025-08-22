@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load translate_tags %}
+
+{% block title %}{% custom_trans_simple "Weather Analytics" %} - PaddySense{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-4 text-info">
+                <i class="fas fa-chart-line"></i> {% custom_trans_simple "Weather Analytics" %}
+            </h1>
+            <p class="lead">
+                {% custom_trans_simple "Comprehensive weather information and farming recommendations" %}
+            </p>
+        </div>
+        <div class="col-md-4 text-right">
+            <a href="{% url 'main:weather' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> {% custom_trans_simple "Back to Weather" %}
+            </a>
+        </div>
+    </div>
+
+    <!-- Analytics Content -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar"></i> {% custom_trans_simple "Weather Analysis" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        {% custom_trans_simple "Weather analytics and insights will be displayed here." %}
+                    </p>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        {% custom_trans_simple "This feature is under development. More detailed analytics will be available soon." %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

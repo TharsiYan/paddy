@@ -1,184 +1,667 @@
 {% extends 'base.html' %}
+{% load translate_tags %}
 
-{% block title %}Weather - PaddySense{% endblock %}
+{% block title %}{% custom_trans_simple "Weather Insights" %} - {% custom_trans_simple "PaddySense" %}{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="text-success">🌤️ Weather Insights</h1>
-            <a href="{% url 'main:home' %}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Home
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-4 text-success">
+                <i class="fas fa-sun"></i> {% custom_trans_simple "Weather Insights" %}
+            </h1>
+            <p class="lead">
+                <i class="fas fa-map-marker-alt text-danger"></i> 
+                <strong id="currentLocation">{{ display_name|default:"Detecting your location..." }}</strong>
+                {% if not search_performed %}
+                    <span class="badge badge-info ml-2">
+                        <i class="fas fa-globe"></i> {% custom_trans_simple "Auto-detected" %}
+                    </span>
+                {% endif %}
+            </p>
+        </div>
+        <div class="col-md-4 text-right">
+            <a href="{% url 'main:weather_analytics' %}?location={{ display_name|default:'Chennai' }}" class="btn btn-outline-info mr-2">
+                <i class="fas fa-chart-line"></i> {% custom_trans_simple "Analytics" %}
+            </a>
+            <a href="{% url 'main:home' %}" class="btn btn-outline-success">
+                <i class="fas fa-arrow-left"></i> {% custom_trans_simple "Back to Home" %}
             </a>
         </div>
     </div>
-</div>
 
-<!-- Current Weather Card -->
-<div class="row mb-4">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-sun"></i> Current Weather
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="text-center">
-                            <h1 class="display-1 text-primary">{{ current_weather.temperature }}°C</h1>
-                            <h4 class="text-muted">{{ current_weather.condition }}</h4>
-                            <p class="text-muted">Feels like {{ current_weather.feels_like }}°C</p>
+    <!-- Search Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-globe"></i> {% custom_trans_simple "Search Any Location Worldwide" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="form-inline">
+                        {% csrf_token %}
+                        <div class="input-group w-100">
+                            <input type="text" 
+                                   class="form-control form-control-lg" 
+                                   name="location" 
+                                   placeholder="{% custom_trans_simple 'Type any city, country, or location (e.g., Tokyo, London, New York, Mumbai, Beijing, Paris)' %}"
+                                   value="{{ location_query|default:'' }}"
+                                   required>
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-search"></i> {% custom_trans_simple "Search" %}
+                                </button>
+                            </div>
                         </div>
+                    </form>
+                    
+                    {% if error %}
+                        <div class="alert alert-danger mt-3">
+                            <i class="fas fa-exclamation-triangle"></i> 
+                            {{ error }}
+                            
+                            {% if suggestions %}
+                                <hr>
+                                <strong>{% custom_trans_simple "Try these suggestions:" %}</strong>
+                                <ul class="mb-0 mt-2">
+                                    {% for suggestion in suggestions %}
+                                        <li>{{ suggestion }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    
+                    {% if search_performed and not error %}
+                        <div class="alert alert-success mt-3">
+                            <i class="fas fa-check-circle"></i> 
+                            {% custom_trans_simple "Showing weather for" %}: <strong>{{ display_name }}</strong>
+                            <br><small class="text-muted">Coordinates: {{ latitude|floatformat:4 }}, {{ longitude|floatformat:4 }}</small>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Search Tips -->
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-lightbulb"></i> <strong>{% custom_trans_simple "Search Tips" %}:</strong>
+                            <br>• {% custom_trans_simple "Use city names like 'London', 'Tokyo', 'Mumbai'" %}
+                            <br>• {% custom_trans_simple "Try 'New York' instead of 'NYC'" %}
+                            <br>• {% custom_trans_simple "Use English names for better results'" %}
+                            <br>• {% custom_trans_simple "Avoid very specific addresses or local names'" %}
+                            <br><strong>{% custom_trans_simple "NEW: Now supports very specific locations!" %}</strong>
+                            <br>• {% custom_trans_simple "Try: 'Jaffna, Sri Lanka', 'Colombo District', 'Kandy Province'" %}
+                            <br>• {% custom_trans_simple "Even works with: 'Main Street, London', 'Central Park, New York'" %}
+                        </small>
                     </div>
-                    <div class="col-md-6">
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="text-center mb-3">
-                                    <i class="fas fa-tint text-info fa-2x"></i>
-                                    <p class="mb-0"><strong>{{ current_weather.humidity }}%</strong></p>
-                                    <small class="text-muted">Humidity</small>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="text-center mb-3">
-                                    <i class="fas fa-cloud-rain text-primary fa-2x"></i>
-                                    <p class="mb-0"><strong>{{ current_weather.rainfall }}mm</strong></p>
-                                    <small class="text-muted">Rainfall</small>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="text-center mb-3">
-                                    <i class="fas fa-wind text-secondary fa-2x"></i>
-                                    <p class="mb-0"><strong>{{ current_weather.wind_speed }} km/h</strong></p>
-                                    <small class="text-muted">Wind Speed</small>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="text-center mb-3">
-                                    <i class="fas fa-eye text-warning fa-2x"></i>
-                                    <p class="mb-0"><strong>{{ current_weather.visibility }}</strong></p>
-                                    <small class="text-muted">Visibility</small>
-                                </div>
-                            </div>
+                    
+                    <!-- Quick Search Buttons -->
+                    <div class="mt-3">
+                        <small class="text-muted mb-2 d-block">
+                            <i class="fas fa-bolt"></i> <strong>{% custom_trans_simple "Quick Search" %}:</strong>
+                        </small>
+                        <div class="btn-group-vertical btn-group-sm w-100">
+                            <button type="button" class="btn btn-outline-secondary mb-1" onclick="quickSearch('London')">
+                                <i class="fas fa-flag"></i> London
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary mb-1" onclick="quickSearch('Tokyo')">
+                                <i class="fas fa-flag"></i> Tokyo
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary mb-1" onclick="quickSearch('Mumbai')">
+                                <i class="fas fa-flag"></i> Mumbai
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary mb-1" onclick="quickSearch('New York')">
+                                <i class="fas fa-flag"></i> New York
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Real-time Status Bar -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-info d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="fas fa-sync-alt"></i> 
+                    <strong>{% custom_trans_simple "Real-time Weather Data" %}</strong>
+                    {% if "Demo" in source %}
+                        <span class="badge badge-warning ml-2">
+                            <i class="fas fa-flask"></i> Demo Mode
+                        </span>
+                    {% endif %}
+                </span>
+                <span>
+                    <small class="text-muted">
+                        {% custom_trans_simple "Last updated" %}: <span id="lastUpdated">{{ current_weather.timestamp|date:"g:i:s A"|default:"--" }}</span>
+                    </small>
+                    <button class="btn btn-sm btn-outline-info ml-2" onclick="refreshWeatherData()">
+                        <i class="fas fa-sync-alt"></i> {% custom_trans_simple "Refresh" %}
+                    </button>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demo Mode Notice -->
+    {% if "Demo" in source %}
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-warning">
+                <i class="fas fa-info-circle"></i>
+                <strong>Demo Mode Active:</strong> This page is currently using demo weather data that updates every 30 seconds. 
+                The external weather APIs are temporarily unavailable, but you can still test all the real-time features!
+                <br><small class="text-muted">Temperature, humidity, wind speed, and other metrics will change automatically.</small>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Weather Content -->
+    {% if current_weather %}
+    <div class="row">
+        <!-- Current Weather -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-sun"></i> {% custom_trans_simple "Current Weather" %}
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <h1 class="display-1 text-info mb-3" id="currentTemp">{{ current_weather.temperature|floatformat:1 }}°C</h1>
+                    <h4 class="text-muted mb-3" id="currentCondition">{{ current_weather.condition }}</h4>
+                    <p class="lead" id="feelsLike">{% custom_trans_simple "Feels like" %} {{ current_weather.feels_like|floatformat:1 }}°C</p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-6">
+                            <div class="weather-metric">
+                                <i class="fas fa-tint text-primary"></i>
+                                <h6>{% custom_trans_simple "Humidity" %}</h6>
+                                <p class="mb-0" id="currentHumidity">{{ current_weather.humidity|floatformat:0 }}%</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="weather-metric">
+                                <i class="fas fa-cloud-rain text-info"></i>
+                                <h6>{% custom_trans_simple "Rainfall" %}</h6>
+                                <p class="mb-0" id="currentRainfall">{{ current_weather.rainfall|floatformat:1 }}mm</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-6">
+                            <div class="weather-metric">
+                                <i class="fas fa-wind text-secondary"></i>
+                                <h6>{% custom_trans_simple "Wind Speed" %}</h6>
+                                <p class="mb-0" id="currentWindSpeed">{{ current_weather.wind_speed|floatformat:1 }} km/h</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="weather-metric">
+                                <i class="fas fa-eye text-success"></i>
+                                <h6>{% custom_trans_simple "Visibility" %}</h6>
+                                <p class="mb-0" id="currentVisibility">{{ current_weather.visibility|floatformat:1 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weather Alerts and UV Index -->
+        <div class="col-md-6 mb-4">
+            <!-- Weather Alerts -->
+            {% if alerts %}
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> {% custom_trans_simple "Weather Alerts" %}
+                    </h5>
+                </div>
+                <div class="card-body" id="weatherAlerts">
+                    {% for alert in alerts %}
+                    <div class="alert alert-warning alert-sm mb-2">
+                        <i class="fas fa-info-circle"></i> {{ alert.message }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- UV Index -->
+            {% if uv_data %}
+            <div class="card">
+                <div class="card-header bg-teal text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-sun"></i> {% custom_trans_simple "UV Index" %}
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <h3 class="text-teal mb-2" id="uvLevel">{{ uv_data.level }}</h3>
+                    <p class="mb-2" id="uvDescription">{{ uv_data.description }}</p>
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-teal" id="uvProgressBar" style="width: {{ uv_data.percentage }}%"></div>
+                    </div>
+                    <small class="text-muted" id="uvValue">{{ uv_data.value|floatformat:1 }} / 11</small>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Weather Trends Analysis -->
+    {% if trends %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card weather-trends-card">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line"></i> {% custom_trans_simple "Weather Trends & Analysis" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">
+                                <i class="fas fa-thermometer-half"></i> Temperature Trend
+                            </h6>
+                            <p class="mb-2">
+                                <span class="badge trend-badge">
+                                    {{ trends.temperature_trend|title }}
+                                </span>
+                            </p>
+                            <p class="text-muted small">{{ trends.forecast_summary }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">
+                                <i class="fas fa-cloud"></i> Condition Trend
+                            </h6>
+                            <p class="mb-2">
+                                <span class="badge trend-badge">
+                                    {{ trends.condition_trend|title }}
+                                </span>
+                            </p>
+                            {% if trends.risk_factors %}
+                            <div class="mt-2">
+                                <h6 class="text-danger">Risk Factors:</h6>
+                                <ul class="list-unstyled small risk-factor-list">
+                                    {% for risk in trends.risk_factors %}
+                                    <li><i class="fas fa-exclamation-triangle text-warning"></i> {{ risk }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Agricultural Recommendations -->
+    {% if recommendations %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card agricultural-recommendations">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">
+                        <i class="fas fa-seedling"></i> {% custom_trans_simple "Agricultural Recommendations" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="agriculturalRecommendations">
+                        {% for rec in recommendations %}
+                        <div class="col-md-6 mb-3">
+                            <div class="recommendation-card p-3 border rounded h-100">
+                                <div class="d-flex align-items-start">
+                                    <div class="flex-shrink-0 me-3">
+                                        <i class="{{ rec.icon }} fa-2x text-{% if rec.type == 'warning' %}warning{% elif rec.type == 'info' %}info{% else %}success{% endif %}"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">{{ rec.title }}</h6>
+                                        <p class="mb-2 small">{{ rec.message }}</p>
+                                        <span class="badge badge-{% if rec.priority == 'high' %}danger{% elif rec.priority == 'medium' %}warning{% else %}info{% endif %}">
+                                            {{ rec.priority|title }} Priority
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Daily Forecast -->
+    {% if daily_forecast %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-alt"></i> {% custom_trans_simple "5-Day Forecast" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="dailyForecast">
+                        {% for day in daily_forecast %}
+                        <div class="col-md-2 col-6 mb-3">
+                            <div class="text-center">
+                                <h6 class="text-muted">{{ day.date|date:"D" }}</h6>
+                                <i class="fas fa-{{ day.icon }} fa-2x text-info mb-2"></i>
+                                <h5 class="mb-1">{{ day.max_temp|floatformat:0 }}°C</h5>
+                                <small class="text-muted">{{ day.min_temp|floatformat:0 }}°C</small>
+                                <p class="mb-0 small">{{ day.condition }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Source Information -->
+    {% if source %}
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="text-center text-muted">
+                <small>
+                    <i class="fas fa-info-circle"></i> 
+                    {% custom_trans_simple "Weather data provided by" %} <span id="weatherSource">{{ source }}</span>
+                    <br>
+                    {% custom_trans_simple "Last updated" %}: <span id="lastUpdatedFooter">{{ current_weather.timestamp|date:"F j, Y, g:i a" }}</span>
+                </small>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- No Weather Data -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-cloud fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">{% custom_trans_simple "No weather data available" %}</h4>
+                    <p class="text-muted">{% custom_trans_simple "Try searching for a different location or check back later." %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.weather-metric {
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+}
+
+.weather-metric h6 {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.weather-metric p {
+    font-weight: bold;
+    color: #495057;
+}
+
+.bg-teal {
+    background-color: #20c997 !important;
+}
+
+.text-teal {
+    color: #20c997 !important;
+}
+
+.alert-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.progress {
+    height: 8px;
+    border-radius: 4px;
+}
+
+.recommendation-card {
+    transition: all 0.3s ease;
+    background-color: #f8f9fa;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    background-color: #ffffff;
+}
+
+.recommendation-card .badge {
+    font-size: 0.75rem;
+}
+
+.weather-trends-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.weather-trends-card .card-header {
+    background: rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.weather-trends-card .text-primary {
+    color: rgba(255,255,255,0.9) !important;
+}
+
+.weather-trends-card .text-muted {
+    color: rgba(255,255,255,0.7) !important;
+}
+
+.agricultural-recommendations {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.agricultural-recommendations .card-header {
+    background: rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.trend-badge {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+}
+
+.risk-factor-list li {
+    padding: 0.25rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.risk-factor-list li:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 768px) {
+    .display-1 {
+        font-size: 3rem;
+    }
     
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header bg-warning text-dark">
-                <h6 class="card-title mb-0">
-                    <i class="fas fa-exclamation-triangle"></i> Weather Alerts
-                </h6>
-            </div>
-            <div class="card-body">
-                {% for alert in alerts %}
-                <div class="alert alert-{{ alert.type }} alert-sm mb-2">
-                    <i class="fas fa-info-circle"></i> {{ alert.message }}
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        
-        <div class="card mt-3">
-            <div class="card-header bg-info text-white">
-                <h6 class="card-title mb-0">
-                    <i class="fas fa-thermometer-half"></i> UV Index
-                </h6>
-            </div>
-            <div class="card-body text-center">
-                <h3 class="text-warning">{{ current_weather.uv_index }}</h3>
-                <small class="text-muted">Sun protection recommended</small>
-            </div>
-        </div>
-    </div>
-</div>
+    .weather-metric {
+        padding: 8px;
+        margin-bottom: 10px;
+    }
+    
+    .recommendation-card {
+        margin-bottom: 1rem;
+    }
+    
+    .trend-badge {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+    }
+}
+</style>
 
-<!-- 7-Day Forecast -->
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header bg-success text-white">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-calendar-alt"></i> 7-Day Forecast
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    {% for day in seven_day_forecast %}
-                    <div class="col-md-6 col-lg-3 mb-3">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body text-center">
-                                <h6 class="card-title text-muted">{{ day.day }}</h6>
-                                <div class="mb-2">
-                                    <span class="display-4">{{ day.icon }}</span>
-                                </div>
-                                <h5 class="text-primary mb-1">{{ day.max_temp }}°C</h5>
-                                <p class="text-muted mb-1">{{ day.min_temp }}°C</p>
-                                <p class="text-muted mb-1">{{ day.condition }}</p>
-                                <div class="row text-center">
-                                    <div class="col-6">
-                                        <small class="text-info">{{ day.rain_probability }}%</small>
-                                        <br><small class="text-muted">Rain</small>
-                                    </div>
-                                    <div class="col-6">
-                                        <small class="text-info">{{ day.humidity }}%</small>
-                                        <br><small class="text-muted">Humidity</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<script>
+// Real-time weather updates
+let weatherUpdateInterval;
 
-<!-- Farming Recommendations -->
-<div class="row">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header bg-info text-white">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-seedling"></i> Farming Recommendations
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    {% for recommendation in recommendations %}
-                    <div class="col-md-6 mb-3">
-                        <div class="d-flex align-items-start">
-                            <div class="flex-shrink-0 me-3">
-                                <i class="fas fa-check-circle text-success fa-lg"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <p class="mb-0">{{ recommendation }}</p>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+document.addEventListener('DOMContentLoaded', function() {
+    // Start real-time updates
+    startWeatherUpdates();
+    
+    // Update every 30 seconds
+    weatherUpdateInterval = setInterval(refreshWeatherData, 30000);
+});
 
-<!-- Action Buttons -->
-<div class="row mt-4">
-    <div class="col-md-12 text-center">
-        <a href="{% url 'main:dashboard' %}" class="btn btn-success btn-lg me-3">
-            <i class="fas fa-chart-line"></i> View Dashboard
-        </a>
-        <a href="{% url 'main:contact' %}" class="btn btn-outline-success btn-lg">
-            <i class="fas fa-phone"></i> Contact Support
-        </a>
-    </div>
-</div>
+function startWeatherUpdates() {
+    console.log('Starting real-time weather updates...');
+    updateLastUpdated();
+}
+
+function refreshWeatherData() {
+    console.log('Refreshing weather data...');
+    
+    // Get current coordinates from the page
+    const lat = {{ latitude|default:"null" }};
+    const lon = {{ longitude|default:"null" }};
+    
+    if (lat && lon) {
+        // Call the weather update API
+        fetch(`/api/weather-update/?lat=${lat}&lon=${lon}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    updateWeatherDisplay(data);
+                    updateLastUpdated();
+                } else {
+                    console.error('Weather update failed:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating weather:', error);
+                // Use demo data as fallback
+                updateWeatherDisplay(getDemoWeatherData());
+                updateLastUpdated();
+            });
+    } else {
+        // No coordinates available, use demo data
+        updateWeatherDisplay(getDemoWeatherData());
+        updateLastUpdated();
+    }
+}
+
+function updateWeatherDisplay(data) {
+    if (data.current) {
+        // Update current weather
+        document.getElementById('currentTemp').textContent = `${data.current.temperature}°C`;
+        document.getElementById('currentCondition').textContent = data.current.condition;
+        document.getElementById('feelsLike').textContent = `Feels like ${data.current.feels_like}°C`;
+        document.getElementById('currentHumidity').textContent = `${data.current.humidity}%`;
+        document.getElementById('currentRainfall').textContent = `${data.current.rainfall}mm`;
+        document.getElementById('currentWindSpeed').textContent = `${data.current.wind_speed} km/h`;
+        document.getElementById('currentVisibility').textContent = data.current.visibility;
+    }
+    
+    if (data.uv_index) {
+        // Update UV data
+        document.getElementById('uvLevel').textContent = data.uv_index.level;
+        document.getElementById('uvDescription').textContent = data.uv_index.description;
+        document.getElementById('uvProgressBar').style.width = `${data.uv_index.percentage}%`;
+        document.getElementById('uvValue').textContent = `${data.uv_index.value} / 11`;
+    }
+    
+    if (data.alerts) {
+        // Update alerts
+        updateAlerts(data.alerts);
+    }
+    
+    if (data.source) {
+        document.getElementById('weatherSource').textContent = data.source;
+    }
+}
+
+function updateAlerts(alerts) {
+    const alertsContainer = document.getElementById('weatherAlerts');
+    if (alertsContainer && alerts.length > 0) {
+        let alertsHtml = '';
+        alerts.forEach(alert => {
+            alertsHtml += `
+                <div class="alert alert-${alert.type || 'warning'} alert-sm mb-2">
+                    <i class="fas fa-info-circle"></i> ${alert.message}
+                </div>
+            `;
+        });
+        alertsContainer.innerHTML = alertsHtml;
+    }
+}
+
+function updateLastUpdated() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString();
+    const dateString = now.toLocaleDateString();
+    
+    document.getElementById('lastUpdated').textContent = timeString;
+    document.getElementById('lastUpdatedFooter').textContent = `${dateString} ${timeString}`;
+}
+
+function getDemoWeatherData() {
+    // Generate demo weather data for testing
+    const baseTemp = 25 + Math.random() * 10 - 5;
+    const conditions = ['Sunny', 'Partly Cloudy', 'Cloudy', 'Light Rain'];
+    
+    return {
+        current: {
+            temperature: baseTemp.toFixed(1),
+            condition: conditions[Math.floor(Math.random() * conditions.length)],
+            feels_like: (baseTemp + Math.random() * 3 - 1).toFixed(1),
+            humidity: Math.floor(60 + Math.random() * 20),
+            rainfall: (Math.random() * 2).toFixed(1),
+            wind_speed: (5 + Math.random() * 15).toFixed(1),
+            visibility: (8 + Math.random() * 7).toFixed(1)
+        },
+        uv_index: {
+            level: ['Low', 'Moderate', 'High'][Math.floor(Math.random() * 3)],
+            description: 'Moderate UV exposure',
+            percentage: 30 + Math.random() * 40,
+            value: (3 + Math.random() * 5).toFixed(1)
+        },
+        alerts: [
+            {
+                type: 'info',
+                message: 'Demo weather data - refreshing every 30 seconds'
+            }
+        ],
+        source: 'Demo Weather Data (Real-time Updates)'
+    };
+}
+
+// Clean up interval when page is unloaded
+window.addEventListener('beforeunload', function() {
+    if (weatherUpdateInterval) {
+        clearInterval(weatherUpdateInterval);
+    }
+});
+
+// Quick search function for the quick search buttons
+function quickSearch(location) {
+    document.querySelector('input[name="location"]').value = location;
+    document.querySelector('form').submit();
+}
+</script>
 {% endblock %}

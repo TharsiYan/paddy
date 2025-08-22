@@ -1,213 +1,315 @@
 {% extends 'base.html' %}
+{% load translate_tags %}
+{% load static %}
 
-{% block title %}Dashboard - PaddySense{% endblock %}
+{% block title %}{% custom_trans_simple "Dashboard" %} - {% custom_trans_simple "PaddySense" %}{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="text-success">🌾 Crop Dashboard</h1>
-            <div>
-                <button class="btn btn-outline-success btn-sm" onclick="refreshData()">
-                    <i class="fas fa-sync-alt"></i> Refresh
-                </button>
-                <button class="btn btn-success btn-sm" onclick="exportReport()">
-                    <i class="fas fa-download"></i> Export Report
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- CSRF Token for AJAX requests -->
+{% csrf_token %}
 
-<!-- Crop Overview -->
-<div class="row mb-4">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header bg-success text-white">
-                <h5 class="mb-0">📊 Crop Overview</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6><strong>Crop:</strong> {{ crop_data.name }}</h6>
-                        <h6><strong>Variety:</strong> {{ crop_data.variety }}</h6>
-                        <h6><strong>Growth Stage:</strong> {{ crop_data.growth_stage }}</h6>
-                    </div>
-                    <div class="col-md-6">
-                        <h6><strong>Planting Date:</strong> {{ crop_data.planting_date }}</h6>
-                        <h6><strong>Expected Harvest:</strong> {{ crop_data.expected_harvest }}</h6>
-                        <h6><strong>Days to Harvest:</strong> {{ crop_data.days_to_harvest }}</h6>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0">📈 Health Score</h5>
-            </div>
-            <div class="card-body text-center">
-                <div class="progress mb-3" style="height: 30px;">
-                    <div class="progress-bar bg-success" role="progressbar" 
-                         style="width: {{ crop_data.health_score }}%" 
-                         aria-valuenow="{{ crop_data.health_score }}" 
-                         aria-valuemin="0" aria-valuemax="100">
-                        {{ crop_data.health_score }}%
-                    </div>
-                </div>
-                <p class="mb-0">
-                    {% if crop_data.health_score >= 80 %}
-                        🟢 Excellent
-                    {% elif crop_data.health_score >= 60 %}
-                        🟡 Good
-                    {% else %}
-                        🔴 Needs Attention
-                    {% endif %}
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Mobile Dashboard (hidden on large screens) -->
+{% include 'components/mobile-dashboard.html' %}
 
-<!-- Real-time Monitoring -->
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body text-center">
-                <h5 class="card-title">🌡️ Soil Temperature</h5>
-                <h2 class="text-info">{{ crop_data.soil_temperature }}°F</h2>
-                <p class="text-muted">Optimal range: 65-75°F</p>
-                <div class="progress">
-                    <div class="progress-bar bg-info" role="progressbar" 
-                         style="width: {% widthratio crop_data.soil_temperature 75 100 %}%"></div>
+<!-- Desktop Dashboard (hidden on mobile) -->
+<div class="dashboard-container d-none d-lg-block">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="text-success">🌾 {% custom_trans_simple "Crop Dashboard" %}</h1>
+                <div>
+                    <button class="btn btn-outline-success btn-sm" id="refresh-btn">
+                        <i class="fas fa-sync-alt"></i> {% custom_trans_simple "Refresh" %}
+                    </button>
+                    <button class="btn btn-success btn-sm" id="export-btn">
+                        <i class="fas fa-download"></i> {% custom_trans_simple "Export Report" %}
+                    </button>
                 </div>
+            </div>
+            
+            <!-- Real-time Status Bar -->
+            <div class="alert alert-info d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-clock"></i> <span class="last-updated">{% custom_trans_simple "Last updated" %}: {% custom_trans_simple "Just now" %}</span></span>
+                <span><i class="fas fa-signal"></i> {% custom_trans_simple "Real-time monitoring active" %}</span>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body text-center">
-                <h5 class="card-title">💧 Moisture Level</h5>
-                <h2 class="text-primary">{{ crop_data.moisture_level }}%</h2>
-                <p class="text-muted">Optimal range: 55-70%</p>
-                <div class="progress">
-                    <div class="progress-bar bg-primary" role="progressbar" 
-                         style="width: {{ crop_data.moisture_level }}%"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body text-center">
-                <h5 class="card-title">⏰ Days to Harvest</h5>
-                <h2 class="text-warning">{{ crop_data.days_to_harvest }}</h2>
-                <p class="text-muted">Harvest window: ±3 days</p>
-                <div class="progress">
-                    <div class="progress-bar bg-warning" role="progressbar" 
-                         style="width: {% widthratio crop_data.days_to_harvest 120 100 %}%"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Weather Forecast and Recommendations -->
-<div class="row">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-warning text-dark">
-                <h5 class="mb-0">🌤️ 4-Day Weather Forecast</h5>
+    <!-- Quick Stats Row -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h4 class="card-title">🌱</h4>
+                    <h3 class="total-crops">{{ crop_data.total_crops|default:"0" }}</h3>
+                    <p class="card-text">{% custom_trans_simple "Active Crops" %}</p>
+                </div>
             </div>
-            <div class="card-body">
-                {% for day in weather_forecast %}
-                <div class="d-flex justify-content-between align-items-center py-2 {% if not forloop.last %}border-bottom{% endif %}">
-                    <div>
-                        <strong>{{ day.date|slice:"5:" }}</strong>
-                        <br>
-                        <small class="text-muted">{{ day.condition }}</small>
-                    </div>
-                    <div class="text-right">
-                        <h6 class="mb-0">{{ day.temp }}°C</h6>
-                        <small class="text-muted">{{ day.humidity }}% humidity</small>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4 class="card-title">📊</h4>
+                    <h3 class="avg-health">{{ crop_data.health_score|default:"85" }}%</h3>
+                    <p class="card-text">{% custom_trans_simple "Avg Health" %}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body text-center">
+                    <h4 class="card-title">⚠️</h4>
+                    <h3 class="crops-needing-attention">{{ crop_data.crops_needing_attention|default:"0" }}</h3>
+                    <p class="card-text">{% custom_trans_simple "Need Attention" %}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h4 class="card-title">🤖</h4>
+                    <h3 class="recommendations-count">{{ crop_data.recommendations_count|default:"0" }}</h3>
+                    <p class="card-text">{% custom_trans_simple "Active Alerts" %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crop Overview -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">📊 Crop Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><strong>Crop:</strong> {{ crop_data.name }}</h6>
+                            <h6><strong>Variety:</strong> {{ crop_data.variety }}</h6>
+                            <h6><strong>Growth Stage:</strong> {{ crop_data.growth_stage }}</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><strong>Planting Date:</strong> {{ crop_data.planting_date }}</h6>
+                            <h6><strong>Expected Harvest:</strong> {{ crop_data.expected_harvest }}</h6>
+                            <h6><strong>Days to Harvest:</strong> {{ crop_data.days_to_harvest }}</h6>
+                        </div>
                     </div>
                 </div>
-                {% endfor %}
             </div>
         </div>
-    </div>
-    
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-success text-white">
-                <h5 class="mb-0">🤖 AI Recommendations</h5>
-            </div>
-            <div class="card-body">
-                {% for recommendation in recommendations %}
-                <div class="alert alert-light border-left border-success pl-3 mb-2">
-                    <i class="fas fa-lightbulb text-success"></i>
-                    {{ recommendation }}
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">📈 Health Score</h5>
                 </div>
-                {% endfor %}
+                <div class="card-body text-center">
+                    <div class="progress mb-3" style="height: 30px;">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ crop_data.health_score }}%" 
+                             aria-valuenow="{{ crop_data.health_score }}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            {{ crop_data.health_score }}%
+                        </div>
+                    </div>
+                    <p class="mb-0">
+                        {% if crop_data.health_score >= 80 %}
+                            🟢 Excellent
+                        {% elif crop_data.health_score >= 60 %}
+                            🟡 Good
+                        {% else %}
+                            🔴 Needs Attention
+                        {% endif %}
+                    </p>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Action Buttons -->
-<div class="row mt-4">
-    <div class="col-md-12 text-center">
-        <button type="button" class="btn btn-success btn-lg mr-3" data-action="schedule-irrigation">
-            <i class="fas fa-tint"></i> Schedule Irrigation
-        </button>
-        <button type="button" class="btn btn-warning btn-lg mr-3" data-action="apply-fertilizer">
-            <i class="fas fa-seedling"></i> Apply Fertilizer
-        </button>
-        <button type="button" class="btn btn-info btn-lg mr-3" data-action="request-expert">
-            <i class="fas fa-user-tie"></i> Request Expert
-        </button>
-    </div>
-</div>
-
-<!-- Additional Action Buttons -->
-<div class="row mt-3">
-    <div class="col-md-12 text-center">
-        <button type="button" class="btn btn-outline-success btn-md mr-2" data-action="dashboard-action" data-action-type="water-crop">
-            <i class="fas fa-tint"></i> Water Crop
-        </button>
-        <button type="button" class="btn btn-outline-warning btn-md mr-2" data-action="dashboard-action" data-action-type="check-soil">
-            <i class="fas fa-thermometer-half"></i> Check Soil
-        </button>
-        <button type="button" class="btn btn-outline-info btn-md" data-action="dashboard-action" data-action-type="view-report">
-            <i class="fas fa-chart-bar"></i> View Report
-        </button>
-    </div>
-</div>
-
-<!-- Status Display -->
-<div class="row mt-3">
-    <div class="col-md-4 text-center">
-        <div class="irrigation-status text-muted">
-            <i class="fas fa-clock"></i> Ready to Schedule
+    <!-- Real-time Monitoring -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">🌡️ Soil Temperature</h5>
+                    <h2 class="text-info temperature-display">{{ crop_data.soil_temperature|default:"25" }}°C</h2>
+                    <p class="text-muted">Optimal range: 20-30°C</p>
+                    <div class="progress">
+                        <div class="progress-bar bg-info" role="progressbar" 
+                             style="width: {% widthratio crop_data.soil_temperature|default:25 30 100 %}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">💧 Moisture Level</h5>
+                    <h2 class="text-primary moisture-display">{{ crop_data.moisture_level|default:"65" }}%</h2>
+                    <p class="text-muted">Optimal range: 55-70%</p>
+                    <div class="progress">
+                        <div class="progress-bar bg-primary" role="progressbar" 
+                             style="width: {{ crop_data.moisture_level|default:65 }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">🌡️ Air Humidity</h5>
+                    <h2 class="text-success humidity-display">{{ crop_data.humidity|default:"70" }}%</h2>
+                    <p class="text-muted">Optimal range: 60-80%</p>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ crop_data.humidity|default:70 }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">🧪 Soil pH</h5>
+                    <h2 class="text-warning ph-display">{{ crop_data.soil_ph|default:"6.8" }}</h2>
+                    <p class="text-muted">Optimal range: 6.0-7.0</p>
+                    <div class="progress">
+                        <div class="progress-bar bg-warning" role="progressbar" 
+                             style="width: {% widthratio crop_data.soil_ph|default:6.8 7.0 100 %}%"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="col-md-4 text-center">
-        <div class="fertilizer-status text-muted">
-            <i class="fas fa-clock"></i> Ready to Apply
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">📈 Sensor Data Trends</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="sensorDataChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">🥧 Crop Health Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="cropHealthChart" width="400" height="200"></canvas>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="col-md-4 text-center">
-        <div class="expert-status text-muted">
-            <i class="fas fa-clock"></i> Expert Available
+
+    <!-- Weather Forecast and Recommendations -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">🌤️ 4-Day Weather Forecast</h5>
+                </div>
+                <div class="card-body">
+                    {% for day in weather_forecast %}
+                    <div class="d-flex justify-content-between align-items-center py-2 {% if not forloop.last %}border-bottom{% endif %}">
+                        <div>
+                            <strong>{{ day.date|slice:"5:" }}</strong>
+                            <br>
+                            <small class="text-muted">{{ day.condition }}</small>
+                        </div>
+                        <div class="text-right">
+                            <h6 class="mb-0">{{ day.temp }}°C</h6>
+                            <small class="text-muted">{{ day.humidity }}% humidity</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">🤖 AI Recommendations</h5>
+                </div>
+                <div class="card-body">
+                    {% for recommendation in recommendations %}
+                    <div class="alert alert-light border-left border-success pl-3 mb-2">
+                        <i class="fas fa-lightbulb text-success"></i>
+                        {{ recommendation }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mt-4">
+        <div class="col-md-12 text-center">
+            <button type="button" class="btn btn-success btn-lg mr-3" data-action="schedule-irrigation">
+                <i class="fas fa-tint"></i> Schedule Irrigation
+            </button>
+            <button type="button" class="btn btn-warning btn-lg mr-3" data-action="apply-fertilizer">
+                <i class="fas fa-seedling"></i> Apply Fertilizer
+            </button>
+            <button type="button" class="btn btn-info btn-lg mr-3" data-action="request-expert">
+                <i class="fas fa-user-tie"></i> Request Expert
+            </button>
+        </div>
+    </div>
+
+    <!-- Additional Action Buttons -->
+    <div class="row mt-3">
+        <div class="col-md-12 text-center">
+            <button type="button" class="btn btn-outline-success btn-md mr-2" data-action="dashboard-action" data-action-type="water-crop">
+                <i class="fas fa-tint"></i> Water Crop
+            </button>
+            <button type="button" class="btn btn-outline-warning btn-md mr-2" data-action="dashboard-action" data-action-type="check-soil">
+                <i class="fas fa-thermometer-half"></i> Check Soil
+            </button>
+            <button type="button" class="btn btn-outline-info btn-md" data-action="dashboard-action" data-action-type="view-report">
+                <i class="fas fa-chart-bar"></i> View Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Status Display -->
+    <div class="row mt-3">
+        <div class="col-md-4 text-center">
+            <div class="irrigation-status text-muted">
+                <i class="fas fa-clock"></i> Ready to Schedule
+            </div>
+        </div>
+        <div class="col-md-4 text-center">
+            <div class="fertilizer-status text-muted">
+                <i class="fas fa-clock"></i> Ready to Apply
+            </div>
+        </div>
+        <div class="col-md-4 text-center">
+            <div class="expert-status text-muted">
+                <i class="fas fa-clock"></i> Expert Available
+            </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<!-- JavaScript functionality is handled by main.js -->
+<!-- Chart.js for data visualization -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- jQuery for Bootstrap modals -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Dashboard functionality -->
+<script src="{% static 'js/dashboard.js' %}"></script>
 {% endblock %}

@@ -1,273 +1,388 @@
 {% extends 'base.html' %}
+{% load translate_tags %}
+{% load static %}
 
-{% block title %}Analytics - PaddySense{% endblock %}
+{% block title %}{% custom_trans_simple "Data Analytics" %} - {% custom_trans_simple "PaddySense" %}{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="text-success">📊 Data Analytics</h1>
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="text-success">📊 Data Analytics</h1>
+        <div>
+            <a href="{% url 'main:user_input' %}" class="btn btn-success me-2">
+                <i class="fas fa-plus"></i> New Data
+            </a>
+            <a href="{% url 'main:paddy_history' %}" class="btn btn-outline-info me-2">
+                <i class="fas fa-history"></i> View History
+            </a>
             <a href="{% url 'main:home' %}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Home
+                <i class="fas fa-home"></i> Back to Home
             </a>
         </div>
     </div>
-</div>
 
-<!-- Key Performance Indicators -->
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header bg-success text-white">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-chart-line"></i> Key Performance Indicators
-                </h5>
+    <!-- Key Performance Indicators -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h3>{{ total_recommendations }}</h3>
+                    <p class="mb-0">Total Recommendations</p>
+                    <small>Data Points Collected</small>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    {% for kpi in kpis %}
-                    <div class="col-md-6 col-lg-3 mb-3">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body text-center">
-                                <div class="mb-3">
-                                    <i class="{{ kpi.icon }} fa-3x text-{{ kpi.color }}"></i>
-                                </div>
-                                <h4 class="text-{{ kpi.color }} mb-1">{{ kpi.value }}</h4>
-                                <h6 class="text-muted mb-1">{{ kpi.title }}</h6>
-                                <div class="d-flex align-items-center justify-content-center">
-                                    {% if kpi.trend == 'up' %}
-                                        <i class="fas fa-arrow-up text-success me-1"></i>
-                                        <span class="text-success">{{ kpi.change }}</span>
-                                    {% else %}
-                                        <i class="fas fa-arrow-down text-danger me-1"></i>
-                                        <span class="text-danger">{{ kpi.change }}</span>
-                                    {% endif %}
-                                </div>
-                                <small class="text-muted">{{ kpi.description }}</small>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3>{{ total_locations }}</h3>
+                    <p class="mb-0">Unique Locations</p>
+                    <small>Farms Monitored</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3>{{ total_fields }}</h3>
+                    <p class="mb-0">Total Fields</p>
+                    <small>Areas Tracked</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h3>{{ weather_impact_score }}%</h3>
+                    <p class="mb-0">Weather Score</p>
+                    <small>Condition Rating</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Yield Trends and Performance -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-seedling"></i> Yield Trends (Monthly)</h5>
+                </div>
+                <div class="card-body">
+                    {% if monthly_yield_data %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Month</th>
+                                        <th>Actual Yield (kg)</th>
+                                        <th>Target (kg)</th>
+                                        <th>Performance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in monthly_yield_data %}
+                                    <tr>
+                                        <td><strong>{{ item.month }}</strong></td>
+                                        <td>
+                                            <span class="badge {% if item.performance >= 90 %}bg-success{% elif item.performance >= 75 %}bg-primary{% elif item.performance >= 60 %}bg-warning{% else %}bg-danger{% endif %}">
+                                                {{ item.actual_yield }} kg
+                                            </span>
+                                        </td>
+                                        <td>{{ item.target_yield }} kg</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar {% if item.performance >= 90 %}bg-success{% elif item.performance >= 75 %}bg-primary{% elif item.performance >= 60 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                                     style="width: {{ item.performance }}%">
+                                                    {{ item.performance }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No yield data available</h5>
+                            <p class="text-muted">Submit more data to see yield trends</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-cloud-sun"></i> Weather Impact Score</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="weather-score-circle mb-3">
+                        <div class="score-display">
+                            <h2 class="mb-0">{{ weather_impact_score }}%</h2>
+                            <small>Impact Score</small>
+                        </div>
+                    </div>
+                    <div class="weather-description">
+                        {% if weather_impact_score >= 80 %}
+                            <span class="badge bg-success">Excellent Conditions</span>
+                        {% elif weather_impact_score >= 60 %}
+                            <span class="badge bg-primary">Good Conditions</span>
+                        {% elif weather_impact_score >= 40 %}
+                            <span class="badge bg-warning">Moderate Conditions</span>
+                        {% else %}
+                            <span class="badge bg-danger">Poor Conditions</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Soil Conditions and Performance Summary -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-layer-group"></i> Soil Conditions (Last 7 Days)</h5>
+                </div>
+                <div class="card-body">
+                    {% if soil_conditions %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Moisture (%)</th>
+                                        <th>Temp (°C)</th>
+                                        <th>pH</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for soil in soil_conditions %}
+                                    <tr>
+                                        <td><small>{{ soil.date }}</small></td>
+                                        <td>
+                                            <span class="badge {% if soil.moisture >= 70 %}bg-success{% elif soil.moisture >= 50 %}bg-primary{% else %}bg-warning{% endif %}">
+                                                {{ soil.moisture }}%
+                                            </span>
+                                        </td>
+                                        <td>{{ soil.temp }}°C</td>
+                                        <td>
+                                            <span class="badge {% if soil.ph >= 6.0 and soil.ph <= 7.0 %}bg-success{% else %}bg-warning{% endif %}">
+                                                {{ soil.ph }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-database fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">No recent soil data</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Performance Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="text-success">
+                                <h4>{{ performance_summary.total_yield }} kg</h4>
+                                <small>Total Yield</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="text-primary">
+                                <h4>{{ performance_summary.efficiency }}%</h4>
+                                <small>Efficiency</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="text-warning">
+                                <h4>₹{{ performance_summary.revenue }}</h4>
+                                <small>Revenue</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="{% if performance_summary.net_profit >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                <h4>₹{{ performance_summary.net_profit }}</h4>
+                                <small>Net Profit</small>
                             </div>
                         </div>
                     </div>
-                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Intelligent Insights -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Intelligent Insights & Recommendations</h5>
+                </div>
+                <div class="card-body">
+                    {% if insights %}
+                        <div class="row">
+                            {% for insight in insights %}
+                            <div class="col-md-6 mb-3">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> {{ insight }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-chart-line fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">Submit more data to generate insights</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historical Performance Data -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-database"></i> Historical Performance Data</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6 class="text-primary">Top Performing Locations</h6>
+                            {% if location_stats %}
+                                <div class="list-group">
+                                    {% for location in location_stats %}
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ location.location }}</strong><br>
+                                            <small class="text-muted">{{ location.count }} entries</small>
+                                        </div>
+                                        <span class="badge {% if location.success_rate >= 80 %}bg-success{% elif location.success_rate >= 60 %}bg-primary{% else %}bg-warning{% endif %}">
+                                            {{ location.success_rate|floatformat:1 }}%
+                                        </span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No location data available</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-success">Soil Type Analysis</h6>
+                            {% if soil_type_stats %}
+                                <div class="list-group">
+                                    {% for soil in soil_type_stats %}
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ soil.soil_type|title }}</strong><br>
+                                            <small class="text-muted">{{ soil.count }} entries</small>
+                                        </div>
+                                        <span class="badge bg-info">{{ soil.avg_temp|floatformat:1 }}°C</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No soil type data available</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-warning">Seasonal Performance</h6>
+                            {% if season_stats %}
+                                <div class="list-group">
+                                    {% for season in season_stats %}
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ season.planting_season|title }}</strong><br>
+                                            <small class="text-muted">{{ season.count }} entries</small>
+                                        </div>
+                                        <span class="badge bg-warning">{{ season.avg_temp|floatformat:1 }}°C</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No seasonal data available</p>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<!-- Charts Section -->
-<div class="row mb-4">
-    <!-- Yield Trends Chart -->
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-chart-area"></i> Yield Trends (Monthly)
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Month</th>
-                                <th>Actual Yield (kg)</th>
-                                <th>Target (kg)</th>
-                                <th>Performance</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for trend in yield_trends %}
-                            <tr>
-                                <td><strong>{{ trend.month }}</strong></td>
-                                <td>{{ trend.yield }}</td>
-                                <td>{{ trend.target }}</td>
-                                <td>
-                                    {% if trend.yield > 0 %}
-                                        {% if trend.yield >= trend.target %}
-                                            <span class="badge badge-success">✓ On Target</span>
-                                        {% else %}
-                                            <span class="badge badge-warning">⚠ Below Target</span>
-                                        {% endif %}
-                                    {% else %}
-                                        <span class="text-muted">-</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+
+// Weather Score Circle Styling
+document.addEventListener('DOMContentLoaded', function() {
+    const weatherScore = {{ weather_impact_score }};
+    const scoreElement = document.querySelector('.weather-score-circle');
     
-    <!-- Weather Impact Chart -->
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header bg-info text-white">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-cloud-sun"></i> Weather Impact Score
-                </h5>
-            </div>
-            <div class="card-body">
-                {% for factor in weather_impact %}
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="font-weight-bold">{{ factor.factor }}</span>
-                        <span class="badge badge-{% if factor.impact == 'Positive' %}success{% elif factor.impact == 'Negative' %}danger{% else %}secondary{% endif %}">
-                            {{ factor.impact }}
-                        </span>
-                    </div>
-                    <div class="progress mb-1" style="height: 8px;">
-                        <div class="progress-bar bg-{% if factor.impact == 'Positive' %}success{% elif factor.impact == 'Negative' %}danger{% else %}secondary{% endif %}" 
-                             style="width: {{ factor.score|floatformat:0 }}%"></div>
-                    </div>
-                    <small class="text-muted">{{ factor.description }}</small>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-</div>
+    if (weatherScore >= 80) {
+        scoreElement.style.color = '#28a745';
+    } else if (weatherScore >= 60) {
+        scoreElement.style.color = '#007bff';
+    } else if (weatherScore >= 40) {
+        scoreElement.style.color = '#ffc107';
+    } else {
+        scoreElement.style.color = '#dc3545';
+    }
+});
+</script>
 
-<!-- Soil Moisture and Performance Data -->
-<div class="row mb-4">
-    <!-- Soil Moisture Trends -->
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-warning text-dark">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-thermometer-half"></i> Soil Conditions (Last 7 Days)
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Moisture (%)</th>
-                                <th>Temp (°C)</th>
-                                <th>pH</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for soil in soil_moisture_data %}
-                            <tr>
-                                <td>{{ soil.date|date:"M d" }}</td>
-                                <td>
-                                    <span class="badge badge-{% if soil.moisture >= 70 %}success{% elif soil.moisture >= 60 %}warning{% else %}danger{% endif %}">
-                                        {{ soil.moisture }}%
-                                    </span>
-                                </td>
-                                <td>{{ soil.temperature }}°C</td>
-                                <td>{{ soil.ph }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Performance Summary -->
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header bg-secondary text-white">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-trophy"></i> Performance Summary
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-6 mb-3">
-                        <h4 class="text-success">2,847 kg</h4>
-                        <small class="text-muted">Total Yield</small>
-                    </div>
-                    <div class="col-6 mb-3">
-                        <h4 class="text-info">85%</h4>
-                        <small class="text-muted">Efficiency</small>
-                    </div>
-                    <div class="col-6 mb-3">
-                        <h4 class="text-warning">₹52,665</h4>
-                        <small class="text-muted">Revenue</small>
-                    </div>
-                    <div class="col-6 mb-3">
-                        <h4 class="text-danger">₹-4</h4>
-                        <small class="text-muted">Net Profit</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<style>
+.weather-score-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 8px solid #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+}
 
-<!-- Historical Performance Table -->
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header bg-dark text-white">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-history"></i> Historical Performance Data
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th>Season</th>
-                                <th>Crop</th>
-                                <th>Area</th>
-                                <th>Yield</th>
-                                <th>Revenue</th>
-                                <th>Cost</th>
-                                <th>Profit</th>
-                                <th>Efficiency</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for performance in performance_data %}
-                            <tr>
-                                <td><strong>{{ performance.season }}</strong></td>
-                                <td>{{ performance.crop }}</td>
-                                <td>{{ performance.area }}</td>
-                                <td>{{ performance.yield }}</td>
-                                <td>{{ performance.revenue }}</td>
-                                <td>{{ performance.cost }}</td>
-                                <td>
-                                    <span class="badge badge-{% if performance.profit == '₹-4' or performance.profit == '₹-1,377' or performance.profit == '₹-3,150' %}danger{% else %}success{% endif %}">
-                                        {{ performance.profit }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge badge-{% if performance.efficiency == '85%' %}success{% elif performance.efficiency == '78%' %}warning{% else %}danger{% endif %}">
-                                        {{ performance.efficiency }}
-                                    </span>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+.score-display h2 {
+    font-weight: bold;
+    margin-bottom: 0;
+}
 
-<!-- Action Buttons -->
-<div class="row mt-4">
-    <div class="col-md-12 text-center">
-        <a href="{% url 'main:dashboard' %}" class="btn btn-success btn-lg me-3">
-            <i class="fas fa-chart-line"></i> View Dashboard
-        </a>
-        <a href="{% url 'main:weather' %}" class="btn btn-outline-success btn-lg me-3">
-            <i class="fas fa-cloud-sun"></i> Weather Insights
-        </a>
-        <a href="{% url 'main:contact' %}" class="btn btn-outline-secondary btn-lg">
-            <i class="fas fa-phone"></i> Contact Support
-        </a>
-    </div>
-</div>
+.score-display small {
+    font-size: 0.8em;
+    opacity: 0.8;
+}
+
+.weather-description {
+    margin-top: 15px;
+}
+
+.weather-description .badge {
+    font-size: 0.9em;
+    padding: 8px 16px;
+}
+</style>
 {% endblock %}

@@ -1,0 +1,165 @@
+{% load translate_tags %}
+<!-- Mobile Dashboard Component -->
+<div class="mobile-dashboard d-lg-none">
+    <!-- Mobile Header -->
+    <div class="mobile-header bg-success text-white p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">🌾 {% custom_trans_simple "Crop Status" %}
+            <button class="btn btn-outline-light btn-sm" onclick="refreshMobileData()">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="row mb-3">
+        <div class="col-6">
+            <div class="card bg-primary text-white text-center">
+                <div class="card-body p-2">
+                    <h6 class="mb-1">🌱</h6>
+                    <h4 class="mb-0 total-crops-mobile">{{ crop_data.total_crops|default:"0" }}</h4>
+                    <small>{% custom_trans_simple "Crops" %}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card bg-success text-white text-center">
+                <div class="card-body p-2">
+                    <h6 class="mb-1">📊</h6>
+                    <h4 class="mb-0 avg-health-mobile">{{ crop_data.health_score|default:"85" }}%</h4>
+                    <small>{% custom_trans_simple "Health" %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sensor Data -->
+    <div class="card mb-3">
+        <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">📡 {% custom_trans_simple "Real-time Data" %}</h6>
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-4">
+                <div class="sensor-item">
+                    <h5 class="text-info temperature-display-mobile">{{ crop_data.soil_temperature|default:"25" }}°C</h5>
+                    <small class="text-muted">{% custom_trans_simple "Soil Temp" %}</small>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="sensor-item">
+                    <h5 class="text-info moisture-display-mobile">{{ crop_data.moisture_level|default:"65" }}%</h5>
+                    <small class="text-muted">{% custom_trans_simple "Moisture" %}</small>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="sensor-item">
+                    <h5 class="text-success humidity-display-mobile">{{ crop_data.humidity|default:"70" }}%</h5>
+                    <small class="text-muted">{% custom_trans_simple "Humidity" %}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Quick Actions -->
+    <div class="card mb-3">
+        <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0">⚡ {% custom_trans_simple "Quick Actions" %}</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-6 mb-2">
+                <button class="btn btn-success btn-block btn-sm" onclick="mobileAction('water')">
+                    <i class="fas fa-tint"></i> {% custom_trans_simple "Water" %}
+                </button>
+            </div>
+            <div class="col-6 mb-2">
+                <button class="btn btn-warning btn-block btn-sm" onclick="mobileAction('fertilizer')">
+                    <i class="fas fa-seedling"></i> {% custom_trans_simple "Fertilizer" %}
+                </button>
+            </div>
+            <div class="col-6 mb-2">
+                <button class="btn btn-info btn-block btn-sm" onclick="mobileAction('check')">
+                    <i class="fas fa-search"></i> {% custom_trans_simple "Check" %}
+                </button>
+            </div>
+            <div class="col-6 mb-2">
+                <button class="btn btn-outline-success btn-block btn-sm" onclick="mobileAction('report')">
+                    <i class="fas fa-chart-bar"></i> {% custom_trans_simple "Report" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Weather Summary -->
+    <div class="card mb-3">
+        <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">🌤️ {% custom_trans_simple "Weather" %}</h6>
+        </div>
+        <div class="card-body">
+            <div class="weather-summary text-center">
+                <h4 class="weather-temp-mobile">--°C</h4>
+                <p class="weather-condition-mobile">{% custom_trans_simple "Loading..." %}</p>
+                <small class="text-muted">{% custom_trans_simple "Humidity" %}: --%</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Alerts -->
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <h6 class="mb-0">⚠️ {% custom_trans_simple "Recent Alerts" %}</h6>
+        </div>
+        <div class="card-body">
+            <div class="alerts-list">
+                <div class="alert alert-warning alert-sm mb-2">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <small>{% custom_trans_simple "Soil moisture is below optimal range" %}</small>
+                </div>
+                <div class="alert alert-info alert-sm mb-2">
+                    <i class="fas fa-info-circle"></i>
+                    <small>{% custom_trans_simple "Fertilizer application due in 3 days" %}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.mobile-dashboard {
+    padding: 10px;
+}
+
+.mobile-header {
+    border-radius: 10px;
+}
+
+.sensor-item {
+    padding: 10px 0;
+}
+
+.alert-sm {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+@media (max-width: 576px) {
+    .mobile-dashboard {
+        padding: 5px;
+    }
+    
+    .card-body {
+        padding: 0.75rem;
+    }
+    
+    .sensor-item h5 {
+        font-size: 1.1rem;
+    }
+}
+</style>

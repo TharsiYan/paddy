@@ -1,16 +1,17 @@
 {% extends 'base.html' %}
+{% load translate_tags %}
 
-{% block title %}Home - PaddySense{% endblock %}
+{% block title %}{% custom_trans_simple "Home" %} - {% custom_trans_simple "PaddySense" %}{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-12">
         <div class="jumbotron bg-light">
-            <h1 class="display-4 text-success">Welcome to PaddySense</h1>
-            <p class="lead">Your intelligent solution for paddy farming and crop management.</p>
+            <h1 class="display-4 text-success">{% custom_trans_simple "Welcome to PaddySense" %}</h1>
+            <p class="lead">{% custom_trans_simple "Intelligent Farming Platform" %}</p>
             <hr class="my-4">
-            <p>Get started with smart farming techniques and data-driven insights.</p>
-            <a class="btn btn-success btn-lg" href="{% url 'main:about' %}" role="button">Learn More</a>
+            <p>{% custom_trans_simple "Empowering farmers with AI-driven insights, real-time monitoring, and data-driven recommendations for optimal crop management." %}</p>
+            <a class="btn btn-success btn-lg" href="{% url 'main:user_input' %}" role="button">{% custom_trans_simple "Get Started" %}</a>
         </div>
     </div>
 </div>
@@ -21,18 +22,18 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">🌱 Crop Monitoring</h5>
-                        <p class="card-text">Monitor your paddy crops with real-time data and analytics.</p>
-                        <a href="{% url 'main:dashboard' %}" class="btn btn-outline-success">View Details</a>
+                        <h5 class="card-title">🌱 {% custom_trans_simple "Crop Monitoring" %}</h5>
+                        <p class="card-text">{% custom_trans_simple "Monitor crop health, growth stages, and environmental conditions in real-time." %}</p>
+                        <a href="{% url 'main:dashboard' %}" class="btn btn-outline-success">{% custom_trans_simple "View Details" %}</a>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">🌤️ Weather Insights</h5>
-                        <p class="card-text">Get accurate weather forecasts and recommendations for your farm.</p>
-                        <a href="{% url 'main:weather' %}" class="btn btn-outline-success">View Details</a>
+                        <h5 class="card-title">🌤️ {% custom_trans_simple "Weather Insights" %}</h5>
+                        <p class="card-text">{% custom_trans_simple "Real-time weather data and forecasts to optimize farming decisions." %}</p>
+                        <a href="{% url 'main:weather' %}" class="btn btn-outline-success">{% custom_trans_simple "View Details" %}</a>
                     </div>
                 </div>
             </div>
@@ -41,18 +42,18 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">📊 Data Analytics</h5>
-                        <p class="card-text">Comprehensive insights and reporting for better decision making.</p>
-                        <a href="{% url 'main:analytics' %}" class="btn btn-outline-success">View Details</a>
+                        <h5 class="card-title">📊 {% custom_trans_simple "Data Analytics" %}</h5>
+                        <p class="card-text">{% custom_trans_simple "Comprehensive analytics and performance metrics for your farm." %}</p>
+                        <a href="{% url 'main:analytics' %}" class="btn btn-outline-success">{% custom_trans_simple "View Details" %}</a>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">🤖 AI Recommendations</h5>
-                        <p class="card-text">Smart suggestions for optimal farming practices.</p>
-                        <a href="{% url 'main:recommendations' %}" class="btn btn-outline-success">View Details</a>
+                        <h5 class="card-title">🤖 {% custom_trans_simple "AI Recommendations" %}</h5>
+                        <p class="card-text">{% custom_trans_simple "AI-powered suggestions for optimal crop management and yield improvement." %}</p>
+                        <a href="{% url 'main:user_input' %}" class="btn btn-outline-success">{% custom_trans_simple "View Details" %}</a>
                     </div>
                 </div>
             </div>
@@ -60,14 +61,14 @@
     </div>
     
     <div class="col-md-4">
-        <div class="card">
+                <div class="card">
             <div class="card-body">
-                <h5 class="card-title">🌤️ Current Weather</h5>
+                <h5 class="card-title">🌤️ {% custom_trans_simple "Current Weather" %}</h5>
                 <div id="weather-display">
                     <div class="text-center">
                         <p class="mb-1"><strong>--°C</strong></p>
-                        <p class="mb-1">Loading...</p>
-                        <p class="mb-0">Humidity: --%</p>
+                        <p class="mb-1">{% custom_trans_simple "Loading..." %}</p>
+                        <p class="mb-0">{% custom_trans_simple "Humidity" %}: --%</p>
                     </div>
                 </div>
             </div>
@@ -75,27 +76,27 @@
         
         <div class="card mt-3">
             <div class="card-body">
-                <h5 class="card-title">📈 Quick Stats</h5>
-                <div class="row text-center">
-                    <div class="col-6">
-                        <h6 class="text-success">85%</h6>
-                        <small>Crop Health</small>
-                    </div>
-                    <div class="col-6">
-                        <h6 class="text-info">72°F</h6>
-                        <small>Soil Temp</small>
-                    </div>
+                            <h5 class="card-title">📈 {% custom_trans_simple "Quick Stats" %}</h5>
+            <div class="row text-center">
+                <div class="col-6">
+                    <h6 class="text-success">85%</h6>
+                    <small>{% custom_trans_simple "Crop Health" %}</small>
                 </div>
-                <div class="row text-center mt-2">
-                    <div class="col-6">
-                        <h6 class="text-warning">60%</h6>
-                        <small>Moisture</small>
-                    </div>
-                    <div class="col-6">
-                        <h6 class="text-primary">14</h6>
-                        <small>Days Left</small>
-                    </div>
+                <div class="col-6">
+                    <h6 class="text-info">72°F</h6>
+                    <small>{% custom_trans_simple "Soil Temp" %}</small>
                 </div>
+            </div>
+            <div class="row text-center mt-2">
+                <div class="col-6">
+                    <h6 class="text-warning">60%</h6>
+                    <small>{% custom_trans_simple "Moisture" %}</small>
+                </div>
+                <div class="col-6">
+                    <h6 class="text-primary">14</h6>
+                    <small>{% custom_trans_simple "Days Left" %}</small>
+                </div>
+            </div>
             </div>
         </div>
     </div>
@@ -107,19 +108,19 @@
         <div class="card bg-light">
             <div class="card-body text-center">
                 <h5 class="card-title text-success mb-3">
-                    <i class="fas fa-share-alt"></i> Follow Us on Social Media
+                    <i class="fas fa-share-alt"></i> {% custom_trans_simple "Social Media" %}
                 </h5>
-                <p class="text-muted mb-4">Stay updated with the latest farming insights and tips</p>
+                <p class="text-muted mb-4">{% custom_trans_simple "Follow us on social media for the latest updates and farming tips." %}</p>
                 
                 <div class="social-media-buttons">
                     <a href="https://www.facebook.com/PaddySense" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg mx-2 mb-2">
-                        <i class="fab fa-facebook-f fa-lg"></i> Facebook
+                        <i class="fab fa-facebook-f fa-lg"></i> {% custom_trans_simple "Facebook" %}
                     </a>
                     <a href="https://twitter.com/PaddySense" target="_blank" rel="noopener noreferrer" class="btn btn-info btn-lg mx-2 mb-2">
-                        <i class="fab fa-twitter fa-lg"></i> Twitter
+                        <i class="fab fa-twitter fa-lg"></i> {% custom_trans_simple "Twitter" %}
                     </a>
                     <a href="https://www.linkedin.com/company/paddysense" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-lg mx-2 mb-2">
-                        <i class="fab fa-linkedin-in fa-lg"></i> LinkedIn
+                        <i class="fab fa-linkedin-in fa-lg"></i> {% custom_trans_simple "LinkedIn" %}
                     </a>
                 </div>
                 

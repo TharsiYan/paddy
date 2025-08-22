@@ -255,7 +255,6 @@ def weather_analytics(request):
 
 def analytics(request):
     """Comprehensive analytics view with intelligent data analysis"""
-    from .models import PaddyRecommendation
     from django.db.models import Avg, Count, Max, Min
     from django.utils import timezone
     from datetime import timedelta
@@ -484,7 +483,6 @@ def user_input(request):
     
     # Get recent entries for display (even on GET request)
     if 'recent_entries' not in context:
-        from .models import PaddyRecommendation
         context['recent_entries'] = PaddyRecommendation.objects.all()[:5]
     
     return render(request, 'user_input.html', context)
@@ -1011,7 +1009,6 @@ def get_dashboard_data(request):
 
 def dashboard_data(request):
     """Get dashboard data for AJAX requests"""
-    from .models import PaddyRecommendation
     
     # Get recent recommendations
     recent_recommendations = PaddyRecommendation.objects.all()[:5]
@@ -1039,7 +1036,6 @@ def dashboard_data(request):
 
 def paddy_history(request):
     """Display history of all paddy recommendations"""
-    from .models import PaddyRecommendation
     
     # Get filter parameters
     location_filter = request.GET.get('location', '')
@@ -1093,7 +1089,6 @@ def paddy_history(request):
 
 def recommendation_details(request, rec_id):
     """Get detailed view of a specific recommendation"""
-    from .models import PaddyRecommendation
     
     try:
         rec = PaddyRecommendation.objects.get(id=rec_id)
@@ -1183,7 +1178,6 @@ def weather_update(request):
 
 def notifications(request):
     """API endpoint for notifications"""
-    from .models import PaddyRecommendation
     
     # Get recent notifications (last 5 recommendations)
     recent_recommendations = PaddyRecommendation.objects.all().order_by('-timestamp')[:5]
